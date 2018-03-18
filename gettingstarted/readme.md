@@ -1,0 +1,1 @@
+Read the [getting started](https://vektah.github.io/gqlgen/tutorial/getting-started/) tutorial.

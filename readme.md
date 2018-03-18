@@ -1,0 +1,1 @@
+This repo contains tutorial code from [gqlgen](https://github.com/vektah/gqlgen)
