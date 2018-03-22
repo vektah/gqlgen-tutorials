@@ -1,0 +1,15 @@
+type Query {
+	todos: [Todo!]
+}
+
+type Todo {
+	id: ID!
+	todo: String!
+	userRaw: User
+	userLoader: User
+}
+
+type User {
+	id: ID!
+	name: String!
+}
