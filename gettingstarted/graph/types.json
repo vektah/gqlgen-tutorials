@@ -1,3 +1,4 @@
 {
-  "User": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User"
+  "User": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User",
+  "Todo": "github.com/vektah/gqlgen-tutorials/gettingstarted/graph.Todo"
 }

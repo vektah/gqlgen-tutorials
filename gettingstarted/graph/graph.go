@@ -13,6 +13,13 @@ type User struct {
 	Name string
 }
 
+type Todo struct {
+	ID     string
+	Text   string
+	Done   bool
+	UserID string
+}
+
 type MyApp struct {
 	todos []Todo
 }
