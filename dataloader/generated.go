@@ -321,7 +321,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	rctx.PushField(field.Alias)
 	defer rctx.Pop()
 	res := obj.ID
-	return graphql.MarshalID(res)
+	return graphql.MarshalInt(res)
 }
 
 func (ec *executionContext) _User_name(ctx context.Context, field graphql.CollectedField, obj *User) graphql.Marshaler {
@@ -1085,6 +1085,6 @@ type Todo {
 }
 
 type User {
-	id: ID!
+	id: Int!
 	name: String!
 }`)

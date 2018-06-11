@@ -6,12 +6,9 @@ package dataloader
 import (
 	"context"
 	"database/sql"
-
 	"net/http"
-
-	"time"
-
 	"strings"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -36,20 +33,24 @@ func DataloaderMiddleware(db *sql.DB, next http.Handler) http.Handler {
 				}
 
 				res := logAndQuery(db,
-					"SELECT id, name from dataloader_example.user WHERE id IN ("+
-						strings.Join(placeholders, ",")+")",
+					"SELECT id, name from dataloader_example.user WHERE id IN ("+strings.Join(placeholders, ",")+")",
 					args...,
 				)
 				defer res.Close()
 
-				users := make([]*User, len(ids))
-				i := 0
+				userById := map[int]*User{}
 				for res.Next() {
-					users[i] = &User{}
-					err := res.Scan(&users[i].ID, &users[i].Name)
+					user := User{}
+					err := res.Scan(&user.ID, &user.Name)
 					if err != nil {
 						panic(err)
 					}
+					userById[user.ID] = &user
+				}
+
+				users := make([]*User, len(ids))
+				for i, id := range ids {
+					users[i] = userById[id]
 					i++
 				}
 
