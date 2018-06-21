@@ -28,11 +28,11 @@ func (a *MyApp) Query_todos(ctx context.Context) ([]Todo, error) {
 	return a.todos, nil
 }
 
-func (a *MyApp) Mutation_createTodo(ctx context.Context, text string) (Todo, error) {
+func (a *MyApp) Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error) {
 	todo := Todo{
-		Text:   text,
+		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
-		UserID: fmt.Sprintf("U%d", rand.Int()),
+		UserID: input.User,
 	}
 	a.todos = append(a.todos, todo)
 	return todo, nil

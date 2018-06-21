@@ -18,7 +18,7 @@ func MakeExecutableSchema(resolvers Resolvers) graphql.ExecutableSchema {
 }
 
 type Resolvers interface {
-	Mutation_createTodo(ctx context.Context, text string) (Todo, error)
+	Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error)
 	Query_todos(ctx context.Context) ([]Todo, error)
 
 	Todo_user(ctx context.Context, obj *Todo) (User, error)
@@ -103,16 +103,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel []query.Selection
 
 func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := field.Args["text"]; ok {
+	var arg0 NewTodo
+	if tmp, ok := field.Args["input"]; ok {
 		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
+		arg0, err = UnmarshalNewTodo(tmp)
 		if err != nil {
 			ec.Error(ctx, err)
 			return graphql.Null
 		}
 	}
-	args["text"] = arg0
+	args["input"] = arg0
 	rctx := graphql.GetResolverContext(ctx)
 	rctx.Object = "Mutation"
 	rctx.Args = args
@@ -121,7 +121,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	defer rctx.Pop()
 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
-		return ec.resolvers.Mutation_createTodo(ctx, args["text"].(string))
+		return ec.resolvers.Mutation_createTodo(ctx, args["input"].(NewTodo))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1108,6 +1108,30 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+func UnmarshalNewTodo(v interface{}) (NewTodo, error) {
+	var it NewTodo
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "text":
+			var err error
+			it.Text, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "user":
+			var err error
+			it.User, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) introspectSchema() *introspection.Schema {
 	return introspection.WrapSchema(parsedSchema)
 }
@@ -1120,23 +1144,27 @@ func (ec *executionContext) introspectType(name string) *introspection.Type {
 	return introspection.WrapType(t)
 }
 
-var parsedSchema = schema.MustParse(`type Query {
-	todos: [Todo!]!
-}
-
-type Mutation {
-	createTodo(text: String!): Todo!
-}
-
-type Todo {
-	id: ID!
-	text: String!
-	done: Boolean!
-	user: User!
+var parsedSchema = schema.MustParse(`type Todo {
+  id: ID!
+  text: String!
+  done: Boolean!
+  user: User!
 }
 
 type User {
-    id: ID!
-    name: String!
+  id: ID!
+  name: String!
 }
-`)
+
+type Query {
+  todos: [Todo!]!
+}
+
+input NewTodo {
+  text: String!
+  user: String!
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+}`)
