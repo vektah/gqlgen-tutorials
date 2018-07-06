@@ -73,17 +73,14 @@ func (l *UserLoader) LoadThunk(key int) func() (*User, error) {
 		var err error
 		// its convenient to be able to return a single error for everything
 		if len(batch.error) == 1 {
-			err = batch.error[pos]
+			err = batch.error[0]
 		} else if batch.error != nil {
 			err = batch.error[pos]
 		}
 
 		if err == nil {
 			l.mu.Lock()
-			if l.cache == nil {
-				l.cache = map[int]*User{}
-			}
-			l.cache[key] = data
+			l.unsafeSet(key, data)
 			l.mu.Unlock()
 		}
 
@@ -108,14 +105,20 @@ func (l *UserLoader) LoadAll(keys []int) ([]*User, []error) {
 	return users, errors
 }
 
-// Prime the cache with the provided key and value. If the key already exists, no change is made.
+// Prime the cache with the provided key and value. If the key already exists, no change is made
+// and false is returned.
 // (To forcefully prime the cache, clear the key first with loader.clear(key).prime(key, value).)
-func (l *UserLoader) Prime(key int, value *User) {
+func (l *UserLoader) Prime(key int, value *User) bool {
 	l.mu.Lock()
-	if _, found := l.cache[key]; !found {
-		l.cache[key] = value
+	var found bool
+	if _, found = l.cache[key]; !found {
+		// make a copy when writing to the cache, its easy to pass a pointer in from a loop var
+		// and end up with the whole cache pointing to the same value.
+		cpy := *value
+		l.unsafeSet(key, &cpy)
 	}
 	l.mu.Unlock()
+	return !found
 }
 
 // Clear the value at key from the cache, if it exists
@@ -123,6 +126,13 @@ func (l *UserLoader) Clear(key int) {
 	l.mu.Lock()
 	delete(l.cache, key)
 	l.mu.Unlock()
+}
+
+func (l *UserLoader) unsafeSet(key int, value *User) {
+	if l.cache == nil {
+		l.cache = map[int]*User{}
+	}
+	l.cache[key] = value
 }
 
 // keyIndex will return the location of the key in the batch, if its not found

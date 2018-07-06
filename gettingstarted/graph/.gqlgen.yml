@@ -1,0 +1,13 @@
+schema: ../schema.graphql
+exec:
+  # filename: generated.go
+  # package:
+model:
+  # filename: models_gen.go
+  # package:
+
+models:
+  Todo:
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted/graph.Todo
+  User:
+    model: github.com/vektah/gqlgen-tutorials/gettingstarted/graph.User

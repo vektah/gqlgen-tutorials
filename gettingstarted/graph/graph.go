@@ -1,4 +1,4 @@
-//go:generate gqlgen -typemap types.json -schema ../schema.graphql
+//go:generate gqlgen
 
 package graph
 

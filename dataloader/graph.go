@@ -1,4 +1,4 @@
-//go:generate gqlgen -schema ./schema.graphql -typemap types.json
+//go:generate gqlgen
 //go:generate dataloaden github.com/vektah/gqlgen-tutorials/dataloader.User
 
 package dataloader
