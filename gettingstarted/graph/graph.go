@@ -6,30 +6,36 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+
+	"github.com/vektah/gqlgen-tutorials/gettingstarted/model"
 )
 
-type User struct {
-	ID   string
-	Name string
+type App struct {
+	todos []model.Todo
 }
 
-type Todo struct {
-	ID     string
-	Text   string
-	Done   bool
-	UserID string
+func (a *App) Mutation() MutationResolver {
+	return &mutationResolver{a}
 }
 
-type MyApp struct {
-	todos []Todo
+func (a *App) Query() QueryResolver {
+	return &queryResolver{a}
 }
 
-func (a *MyApp) Query_todos(ctx context.Context) ([]Todo, error) {
+func (a *App) Todo() TodoResolver {
+	return &todoResolver{a}
+}
+
+type queryResolver struct{ *App }
+
+func (a *queryResolver) Todos(ctx context.Context) ([]model.Todo, error) {
 	return a.todos, nil
 }
 
-func (a *MyApp) Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, error) {
-	todo := Todo{
+type mutationResolver struct{ *App }
+
+func (a *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (model.Todo, error) {
+	todo := model.Todo{
 		Text:   input.Text,
 		ID:     fmt.Sprintf("T%d", rand.Int()),
 		UserID: input.User,
@@ -38,6 +44,8 @@ func (a *MyApp) Mutation_createTodo(ctx context.Context, input NewTodo) (Todo, e
 	return todo, nil
 }
 
-func (a *MyApp) Todo_user(ctx context.Context, it *Todo) (User, error) {
-	return User{ID: it.UserID, Name: "user " + it.UserID}, nil
+type todoResolver struct{ *App }
+
+func (a *todoResolver) User(ctx context.Context, it *model.Todo) (model.User, error) {
+	return model.User{ID: it.UserID, Name: "user " + it.UserID}, nil
 }

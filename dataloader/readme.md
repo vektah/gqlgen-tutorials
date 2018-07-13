@@ -1,1 +1,1 @@
-Read the [docs](https://vektah.github.io/gqlgen/reference/dataloaders/)
+Read the [docs](https://gqlgen.com/reference/dataloaders/)
