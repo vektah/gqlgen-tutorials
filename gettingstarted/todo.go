@@ -1,4 +1,4 @@
-package model
+package gettingstarted
 
 type Todo struct {
 	ID     string
