@@ -29,7 +29,7 @@ func DataloaderMiddleware(db *sql.DB, next http.Handler) http.Handler {
 				args := make([]interface{}, len(ids))
 				for i := 0; i < len(ids); i++ {
 					placeholders[i] = "?"
-					args[i] = i
+					args[i] = ids[i]
 				}
 
 				res := logAndQuery(db,
