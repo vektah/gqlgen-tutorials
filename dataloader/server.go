@@ -1,18 +1,24 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"gqlgen-tutorials/dataloader/dataloader"
+	"gqlgen-tutorials/dataloader/graph"
+	"gqlgen-tutorials/dataloader/graph/generated"
 	"log"
 	"net/http"
+	"os"
 
-	"database/sql"
-
-	"github.com/vektah/gqlgen-tutorials/dataloader"
-	"github.com/vektah/gqlgen/handler"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	_ "github.com/go-sql-driver/mysql"
 )
 
+const defaultPort = "8080"
+
 func main() {
-	db, err := sql.Open("mysql", "root@tcp(127.0.0.1)/")
+	db, err := sql.Open("mysql", "root@tcp(mysql.dockervm:49926)/")
 	if err != nil {
 		panic(err)
 	}
@@ -32,13 +38,20 @@ func main() {
 
 	db.Exec("INSERT INTO todo (todo, user_id)")
 
-	queryHandler := handler.GraphQL(dataloader.MakeExecutableSchema(dataloader.New(db)))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
 
-	http.Handle("/", handler.Playground("Todo", "/query"))
-	http.Handle("/query", dataloader.DataloaderMiddleware(db, queryHandler))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{
+		Conn: db,
+	}}))
 
-	fmt.Println("Listening on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", dataloader.Middleware(db, srv))
+
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 func mustExec(db *sql.DB, query string, args ...interface{}) {
